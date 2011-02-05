@@ -8,6 +8,19 @@ wwwdir=$HOME/www
 CVSROOT=:pserver:cvs@cvs.pld-linux.org:/cvsroot
 d=$-
 
+# get a copy of packages repo for faster local processing
+# modifies: sets up $CVSROOT to be local if used
+cvs_rsync() {
+	set -$d
+
+	CVSROOT=$(pwd)
+
+	[ ! -f cvs.rsync ] || return 0
+	# sync only *,v files and dirs
+	rsync -av rsync://cvs.pld-linux.org/cvs/packages/ packages/ --include=**/*,v --include=**/ --exclude=*
+	touch cvs.rsync
+}
+
 # generate list of .specs on ftp. needs cvsnt client
 # input: $CVSROOT = cvs server location
 # output: $t/cvs.dirs = list of pkgs on cvs
@@ -67,6 +80,7 @@ git_import() {
 		git cvsimport -d $CVSROOT -C git-import/$pkg -R -A cvs.users packages/$pkg || {
 			rm -rf git-import/$pkg
 			echo $pkg >> cvs.blacklist
+			exit 1
 		}
 	done
 }
@@ -90,6 +104,7 @@ git_bare() {
 	set -$d
 	local pkg
 
+	git_templates
 	install -d git
 	for pkg in ${@:-$(cat cvs.dirs)}; do
 		grep -qF $pkg git.blacklist && continue
@@ -145,9 +160,15 @@ git_missingusers() {
 	touch git.users
 }
 
+
 cvs_pkgs
 cvs_users
+
+cvs_rsync
+
 git_import "$@"
-git_missingusers
-git_templates
+
+# missingusers needed only to analyze missing users file
+#git_missingusers
+
 git_bare "$@"
