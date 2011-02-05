@@ -152,15 +152,29 @@ git_shortlog() {
 	cat git-import/.*.shortlog > git.shortlog
 }
 
+git_authors() {
+	set -$d
+	local pkg
+
+	[ ! -s git.authors ] || return
+
+	git_dirs
+	for pkg in $(cat git.dirs); do
+		grep -qF $pkg cvs.blacklist && continue
+
+		cat git-import-old/$pkg/.git/cvs-authors || echo $pkg >> cvs.no-autor
+	done | sort -u > git.authors
+}
+
 # generate list of missing authors from all git modules
 git_missingusers() {
 	set -$d
 	local pkg
 
 	[ -f git.users ] && return
-	git_shortlog
+	git_authors
 
-	sed -rne 's,.+<(.*)>,\1,p' git.shortlog | sort -u | grep -v @ > git.users.unknown
+	sed -rne 's,.+<(.*)>,\1,p' git.authors | grep -v @ > git.users.unknown
 	local user
 	for user in $(cat git.users.unknown); do
 		if ! grep -q "^$user=" cvs.users; then
