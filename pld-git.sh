@@ -62,8 +62,11 @@ git_import() {
 
 		grep -qF $pkg cvs.blacklist && continue
 		# commits are mixed latin2 and utf8, do not force neither.
-		# -c i18n.commitencoding=iso8859-2 
-		git cvsimport -d $CVSROOT -C git-import/$pkg -R -A cvs.users packages/$pkg || echo $pkg >> cvs.blacklist
+		# -c i18n.commitencoding=iso8859-2
+		git cvsimport -d $CVSROOT -C git-import/$pkg -R -A cvs.users packages/$pkg || {
+			rm -rf git-import/$pkg
+			echo $pkg >> cvs.blacklist
+		}
 	done
 }
 
@@ -88,6 +91,8 @@ git_bare() {
 
 	install -d git
 	for pkg in ${@:-$(cat cvs.dirs)}; do
+		grep -qF $pkg git.blacklist && continue
+
 		test -d git-import/$pkg || continue
 		test -d gitroot/$pkg && continue
 
@@ -95,8 +100,52 @@ git_bare() {
 	done
 }
 
+git_dirs() {
+	[ -s git.dirs ] || ls -1 git-import > git.dirs
+}
+
+# generate shortlog for each package
+git_shortlog() {
+	set -$d
+	local pkg
+
+	[ ! -f git.shortlog ] || return
+
+	git_dirs
+	for pkg in $(cat git.dirs); do
+		grep -qF $pkg cvs.blacklist && continue
+		[ -s git-import/.$pkg.shortlog ] && continue
+
+		cd git-import/$pkg
+		git shortlog -s -e > ../.$pkg.shortlog
+		cd ../../
+	done
+
+	cat git-import/.*.shortlog > git.shortlog
+}
+
+# generate list of missing authors from all git modules
+git_missingusers() {
+	set -$d
+	local pkg
+
+	[ ! -s git.users ] || return
+	git_shortlog
+
+	sed -rne 's,.+<(.*)>,\1,p' git.shortlog | sort -u | grep -v @ > git.users.unknown
+	local user
+	for user in $(cat git.users.unknown); do
+		if ! grep -q "^$user=" cvs.users; then
+			if ! grep -q "^$user" cvs.users.missing; then
+				echo $user >> cvs.users.missing
+			fi
+		fi
+	done
+}
+
 cvs_pkgs
 cvs_users
 git_import "$@"
+git_missingusers
 git_templates
 git_bare "$@"
