@@ -60,11 +60,42 @@ cvs_users() {
 	'  cvs.userlog > cvs.users
 }
 
+# run cvs2git on each package module
+# input: cvs.dirs = list of packages
+# conflicts with import_git-cvsimport
+import_cvs2git() {
+	set -$d
+	local pkg gitdir=git-import
+
+	[ -x /usr/bin/cvs2git ] || {
+		echo >&2 "cvs2git missing, install cvs2svn package"
+		exit 1
+	}
+
+	touch cvs.blacklist
+	install -d $gitdir
+	for pkg in ${@:-$(cat cvs.dirs)}; do
+		# faster startup, skip existing ones for now
+		test -d $gitdir/$pkg && continue
+		grep -qF $pkg cvs.blacklist && continue
+
+		install -d $gitdir/$pkg
+		cd $gitdir/$pkg
+		git init
+		cvs2git --use-rcs --blobfile=.git/cvs2git.blob --dumpfile=.git/cvs2git.dump --username=cvs --fallback-encoding=latin2 ../../packages/$pkg
+		git fast-import --export-marks=.git/cvs2git.marks < .git/cvs2git.blob
+		git fast-import --import-marks=.git/cvs2git.marks < .git/cvs2git.dump
+		git checkout master
+		cd ../../
+	done
+}
+
 # run git cvsimport on each package module
 # input: $CVSROOT
 # input: cvs.dirs = list of packages
 # modifies: cvs.blacklist = list of problematic packages
-git_import() {
+# conflicts with import_cvs2git
+import_git-cvsimport() {
 	set -$d
 	local pkg
 
@@ -162,7 +193,7 @@ git_authors() {
 	for pkg in $(cat git.dirs); do
 		grep -qF $pkg cvs.blacklist && continue
 
-		cat git-import-old/$pkg/.git/cvs-authors || echo $pkg >> cvs.no-autor
+		cat git-import/$pkg/.git/cvs-authors || echo $pkg >> cvs.no-autor
 	done | sort -u > git.authors
 }
 
@@ -192,7 +223,9 @@ cvs_users
 
 cvs_rsync
 
-git_import "$@"
+import_git-cvsimport "$@"
+#import_cvs2git "$@"
+
 git_rewrite_commitlogs "$@"
 
 # missingusers needed only to analyze missing users file
