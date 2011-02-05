@@ -85,6 +85,18 @@ git_import() {
 	done
 }
 
+# rewrite commit logs
+# historically old commits were in latin2, detect those and convert to utf8
+git_rewrite_commitlogs() {
+	local msgconv=$(pwd)/msgconv.sh
+
+	for pkg in ${@:-$(cat cvs.dirs)}; do
+		cd gitroot/$pkg
+		git filter-branch --msg-filter "$msgconv"
+		cd ../../
+	done
+}
+
 # create template dir of git_bare
 # we copy system template dir and remove samples from it
 git_templates() {
@@ -167,6 +179,7 @@ cvs_users
 cvs_rsync
 
 git_import "$@"
+git_rewrite_commitlogs "$@"
 
 # missingusers needed only to analyze missing users file
 #git_missingusers
