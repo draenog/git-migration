@@ -56,6 +56,7 @@ git_import() {
 	local pkg
 
 	touch cvs.blacklist
+	install -d git-import
 	for pkg in ${@:-$(cat cvs.dirs)}; do
 		# faster startup, skip existing ones for now
 		test -d git-import/$pkg && continue
