@@ -1,0 +1,12 @@
+# manually blocked:
+kernel
+libghttp
+kernel-desktop
+kernel-smp
+# auto blocked:
+classpath
+fltk2
+java-gnu-classpath
+joomla
+kernel-bare-grsecurity
+kernel-block-gnbd
