@@ -129,7 +129,7 @@ git_missingusers() {
 	set -$d
 	local pkg
 
-	[ ! -s git.users ] || return
+	[ -f git.users ] && return
 	git_shortlog
 
 	sed -rne 's,.+<(.*)>,\1,p' git.shortlog | sort -u | grep -v @ > git.users.unknown
@@ -141,6 +141,7 @@ git_missingusers() {
 			fi
 		fi
 	done
+	touch git.users
 }
 
 cvs_pkgs
