@@ -5,7 +5,7 @@
 # $ git-filter-branch --msg-filter msgconv.sh
 
 s=$(cat)
-if echo "$s" | grep --color '[±æê³ñó¶¼¿¡ÆÊ£ÑÓ¦¬¯]'; then
+if echo "$s" | LC_ALL=C LANG= grep -E '±|æ|ê|³|ñ|ó|¶|¼|¿|¡|Æ|Ê|£|Ñ|Ó|¦|¬|¯'; then
 	echo "$s"  | iconv -flatin2 -tutf8
 else
 	echo "$s"
