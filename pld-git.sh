@@ -10,6 +10,7 @@ d=$-
 
 # get a copy of packages repo for faster local processing
 # modifies: sets up $CVSROOT to be local if used
+# creates: cvs.pkgs for packages being modified
 cvs_rsync() {
 	set -$d
 
@@ -17,17 +18,35 @@ cvs_rsync() {
 
 	[ ! -f cvs.rsync ] || return 0
 	# sync only *,v files and dirs
-	rsync -av rsync://cvs.pld-linux.org/cvs/packages/ packages/ --include=**/*,v --include=**/ --exclude=*
+	local logfile=rsync.log
+	> $logfile
+	rsync -av rsync://cvs.pld-linux.org/cvs/packages/ packages/ \
+		--log-file=$logfile --log-file-format='changes=%i name=%n' \
+		--include=**/*,v --include=**/ --exclude=*
+
+	# parse rsync log
+	# we want "^.f" - any file change
+	grep 'changes=.f' $logfile | sed -rne 's/.*name=([^/]+).*/\1/p' | sort -u > cvs.pkgs
+
 	touch cvs.rsync
 }
 
 # generate list of .specs on ftp. needs cvsnt client
 # input: $CVSROOT = cvs server location
 # output: $t/cvs.dirs = list of pkgs on cvs
-cvs_pkgs() {
+cvs_dirs() {
 	set -$d
 	[ -s cvs.raw ] || cvs -d $CVSROOT -Q ls -e packages > cvs.raw 2>/dev/null
 	[ -s cvs.dirs ] || awk -F/ '$1 == "D" { print $2 } ' cvs.raw > cvs.dirs
+}
+
+# expect cvs.pkgs, can be created by rsync.log of looking packages/ in cvs
+cvs_pkgs() {
+	set -$d
+
+	[ -f cvs.pkgs ] && return
+	cvs_dirs
+	cat cvs.dirs > cvs.pkgs
 }
 
 # generate userlist for git import
@@ -61,7 +80,7 @@ cvs_users() {
 }
 
 # run cvs2git on each package module
-# input: cvs.dirs = list of packages
+# input: cvs.pkgs = list of packages
 # conflicts with import_git-cvsimport
 import_cvs2git() {
 	set -$d
@@ -72,12 +91,15 @@ import_cvs2git() {
 		exit 1
 	}
 
+	cvs_pkgs
+
 	touch cvs.blacklist
 	install -d $gitdir
-	for pkg in ${@:-$(cat cvs.dirs)}; do
+	for pkg in ${@:-$(cat cvs.pkgs)}; do
+		grep -qF $pkg cvs.blacklist && continue
+
 		# faster startup, skip existing ones for now
 		test -d $gitdir/$pkg && continue
-		grep -qF $pkg cvs.blacklist && continue
 
 		install -d $gitdir/$pkg
 		cd $gitdir/$pkg
@@ -92,20 +114,24 @@ import_cvs2git() {
 
 # run git cvsimport on each package module
 # input: $CVSROOT
-# input: cvs.dirs = list of packages
+# input: cvs.pkgs = list of packages
 # modifies: cvs.blacklist = list of problematic packages
 # conflicts with import_cvs2git
 import_git-cvsimport() {
 	set -$d
 	local pkg
 
+	cvs_pkgs
+	cvs_users
+
 	touch cvs.blacklist
 	install -d git-import
-	for pkg in ${@:-$(cat cvs.dirs)}; do
-		# faster startup, skip existing ones for now
-		test -d git-import/$pkg && continue
-
+	for pkg in ${@:-$(cat cvs.pkgs)}; do
 		grep -qF $pkg cvs.blacklist && continue
+
+		# faster startup, skip existing ones for now
+#		test -d git-import/$pkg && continue
+
 		# commits are mixed latin2 and utf8, do not force neither.
 		# -c i18n.commitencoding=iso8859-2
 		git cvsimport -d $CVSROOT -C git-import/$pkg -R -A cvs.users packages/$pkg || {
@@ -121,7 +147,10 @@ import_git-cvsimport() {
 git_rewrite_commitlogs() {
 	local msgconv=$(pwd)/msgconv.sh
 
-	for pkg in ${@:-$(cat cvs.dirs)}; do
+	cvs_pkgs
+	for pkg in ${@:-$(cat cvs.pkgs)}; do
+		grep -qF $pkg cvs.blacklist && continue
+
 		cd gitroot/$pkg
 		git filter-branch --msg-filter "$msgconv"
 		cd ../../
@@ -141,26 +170,28 @@ git_templates() {
 	> templates/description
 }
 
+git_dirs() {
+	[ -s git.dirs ] || ls -1 git-import > git.dirs
+}
+
 # setup bare git repo for each imported git repo
-# input: cvs.dirs = list of packages
+# input: cvs.pkgs = list of packages
 git_bare() {
 	set -$d
 	local pkg
 
 	git_templates
+	cvs_pkgs
 	install -d git
-	for pkg in ${@:-$(cat cvs.dirs)}; do
+	for pkg in ${@:-$(cat cvs.pkgs)}; do
+		grep -qF $pkg cvs.blacklist && continue
 		grep -qF $pkg git.blacklist && continue
 
-		test -d git-import/$pkg || continue
-		test -d gitroot/$pkg && continue
+		test -d git-import/$pkg
 
+		rm -rf gitroot/$pkg
 		git clone --bare --template=templates git-import/$pkg gitroot/$pkg || echo $pkg >> git.blacklist
 	done
-}
-
-git_dirs() {
-	[ -s git.dirs ] || ls -1 git-import > git.dirs
 }
 
 # generate shortlog for each package
@@ -203,6 +234,7 @@ git_missingusers() {
 	local pkg
 
 	[ -f git.users ] && return
+	cvs_users
 	git_authors
 
 	sed -rne 's,.+<(.*)>,\1,p' git.authors | grep -v @ > git.users.unknown
@@ -218,17 +250,13 @@ git_missingusers() {
 }
 
 
-cvs_pkgs
-cvs_users
-
 cvs_rsync
 
 import_git-cvsimport "$@"
 #import_cvs2git "$@"
 
-git_rewrite_commitlogs "$@"
-
 # missingusers needed only to analyze missing users file
 #git_missingusers
 
 git_bare "$@"
+git_rewrite_commitlogs "$@"
