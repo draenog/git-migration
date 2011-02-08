@@ -152,7 +152,7 @@ git_rewrite_commitlogs() {
 		grep -qF $pkg cvs.blacklist && continue
 
 		cd gitroot/$pkg
-		git filter-branch --msg-filter "$msgconv"
+		git filter-branch --msg-filter "$msgconv" --tag-name-filter cat
 		cd ../../
 	done
 }
