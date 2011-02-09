@@ -107,7 +107,6 @@ import_cvs2git() {
 		git fast-import --export-marks=cvs2svn-tmp/cvs2git.marks < cvs2svn-tmp/git-blob.dat
 		git fast-import --import-marks=cvs2svn-tmp/cvs2git.marks < cvs2svn-tmp/git-dump.dat
 		./cvs2git_fixes.sh $pkg
-		git checkout master
 		unset GIT_DIR
 	done
 }
