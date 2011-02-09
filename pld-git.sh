@@ -94,12 +94,12 @@ import_cvs2git() {
 	cvs_pkgs
 
 	touch cvs.blacklist
-	install -d $gitdir
+	install -d $gitdir cvs2svn-tmp
 	for pkg in ${@:-$(cat cvs.pkgs)}; do
 		grep -qF $pkg cvs.blacklist && continue
 
-		# faster startup, skip existing ones for now
-		test -d $gitdir/$pkg && continue
+		# can't resume, drop old efforts
+		rm -rf $gitdir/$pkg
 
 		export GIT_DIR=$gitdir/$pkg
 		git init
@@ -107,6 +107,12 @@ import_cvs2git() {
 		git fast-import --export-marks=cvs2svn-tmp/cvs2git.marks < cvs2svn-tmp/git-blob.dat
 		git fast-import --import-marks=cvs2svn-tmp/cvs2git.marks < cvs2svn-tmp/git-dump.dat
 		./cvs2git_fixes.sh $pkg
+		# add origin remote
+		git remote add origin git@github.com:pld-linux/$pkg.git
+		# do some space
+		git repack -a -d
+		> $GIT_DIR/description
+		rm -f $GIT_DIR/hooks/*
 		unset GIT_DIR
 	done
 }
@@ -115,7 +121,6 @@ import_cvs2git() {
 # input: $CVSROOT
 # input: cvs.pkgs = list of packages
 # modifies: cvs.blacklist = list of problematic packages
-# conflicts with import_cvs2git
 import_git-cvsimport() {
 	set -$d
 	local pkg
@@ -173,10 +178,11 @@ git_dirs() {
 }
 
 # setup bare git repo for each imported git repo
+# i.e repos that should be used for serving git service
 # input: cvs.pkgs = list of packages
 git_bare() {
 	set -$d
-	local pkg
+	local pkg gitdir=git-import
 
 	git_templates
 	cvs_pkgs
@@ -185,10 +191,10 @@ git_bare() {
 		grep -qF $pkg cvs.blacklist && continue
 		grep -qF $pkg git.blacklist && continue
 
-		test -d git-import/$pkg
+		test -d $gitdir/$pkg
 
 		rm -rf gitroot/$pkg
-		git clone --bare --template=templates git-import/$pkg gitroot/$pkg || echo $pkg >> git.blacklist
+		git clone --bare --mirror --template=templates git-import/$pkg gitroot/$pkg || echo $pkg >> git.blacklist
 	done
 }
 
@@ -250,11 +256,12 @@ git_missingusers() {
 
 cvs_rsync
 
-import_git-cvsimport "$@"
-#import_cvs2git "$@"
+#import_git-cvsimport "$@"
+import_cvs2git "$@"
+#git_rewrite_commitlogs "$@"
 
 # missingusers needed only to analyze missing users file
 #git_missingusers
 
-git_bare "$@"
-git_rewrite_commitlogs "$@"
+# do not need bare repo, if all we do is push to github
+#git_bare "$@"
