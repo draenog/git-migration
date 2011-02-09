@@ -26,7 +26,7 @@ while read rev tagname; do
         fi
 done
 
-git show-ref --heads | egrep 'unlabeled-[0-9.]+$' | \
+git show-ref --heads | grep -E 'unlabeled-[0-9.]+$' | \
 while read rev branchname; do
         if [ -z "$name" ]; then
                 git update-ref -d "$branchname" $rev
