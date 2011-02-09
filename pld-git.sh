@@ -96,7 +96,7 @@ import_cvs2git() {
 	touch cvs.blacklist
 	install -d $gitdir cvs2svn-tmp
 	for pkg in ${@:-$(cat cvs.pkgs)}; do
-		grep -qF $pkg cvs.blacklist && continue
+		grep -qxF $pkg cvs.blacklist && continue
 
 		# can't resume, drop old efforts
 		rm -rf $gitdir/$pkg
@@ -131,7 +131,7 @@ import_git-cvsimport() {
 	touch cvs.blacklist
 	install -d git-import
 	for pkg in ${@:-$(cat cvs.pkgs)}; do
-		grep -qF $pkg cvs.blacklist && continue
+		grep -qxF $pkg cvs.blacklist && continue
 
 		# faster startup, skip existing ones for now
 #		test -d git-import/$pkg && continue
@@ -152,7 +152,7 @@ git_rewrite_commitlogs() {
 
 	cvs_pkgs
 	for pkg in ${@:-$(cat cvs.pkgs)}; do
-		grep -qF $pkg cvs.blacklist && continue
+		grep -qxF $pkg cvs.blacklist && continue
 
 		cd gitroot/$pkg
 		git filter-branch --msg-filter "$msgconv" --tag-name-filter cat -- --all
@@ -188,8 +188,8 @@ git_bare() {
 	cvs_pkgs
 	install -d git
 	for pkg in ${@:-$(cat cvs.pkgs)}; do
-		grep -qF $pkg cvs.blacklist && continue
-		grep -qF $pkg git.blacklist && continue
+		grep -qxF $pkg cvs.blacklist && continue
+		grep -qxF $pkg git.blacklist && continue
 
 		test -d $gitdir/$pkg
 
@@ -207,7 +207,7 @@ git_shortlog() {
 
 	git_dirs
 	for pkg in $(cat git.dirs); do
-		grep -qF $pkg cvs.blacklist && continue
+		grep -qxF $pkg cvs.blacklist && continue
 		[ -s git-import/.$pkg.shortlog ] && continue
 
 		cd git-import/$pkg
@@ -226,7 +226,7 @@ git_authors() {
 
 	git_dirs
 	for pkg in $(cat git.dirs); do
-		grep -qF $pkg cvs.blacklist && continue
+		grep -qxF $pkg cvs.blacklist && continue
 
 		cat git-import/$pkg/.git/cvs-authors || echo $pkg >> cvs.no-autor
 	done | sort -u > git.authors
