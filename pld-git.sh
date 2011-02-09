@@ -101,14 +101,14 @@ import_cvs2git() {
 		# faster startup, skip existing ones for now
 		test -d $gitdir/$pkg && continue
 
-		install -d $gitdir/$pkg
-		cd $gitdir/$pkg
+		export GIT_DIR=$gitdir/$pkg
 		git init
-		cvs2git --use-rcs --blobfile=.git/cvs2git.blob --dumpfile=.git/cvs2git.dump --username=cvs --fallback-encoding=latin2 ../../packages/$pkg
-		git fast-import --export-marks=.git/cvs2git.marks < .git/cvs2git.blob
-		git fast-import --import-marks=.git/cvs2git.marks < .git/cvs2git.dump
+		CVS_REPO=packages/$pkg cvs2git --options=cvs2git.options
+		git fast-import --export-marks=cvs2svn-tmp/cvs2git.marks < cvs2svn-tmp/git-blob.dat
+		git fast-import --import-marks=cvs2svn-tmp/cvs2git.marks < cvs2svn-tmp/git-dump.dat
+		cvs2git_fixes.sh $pkg
 		git checkout master
-		cd ../../
+		unset GIT_DIR
 	done
 }
 
