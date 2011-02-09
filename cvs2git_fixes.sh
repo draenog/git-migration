@@ -4,6 +4,7 @@
 # repo is moved to the parent if the tagged commit:
 # 1. was made by cvs2svn
 # 2. the only change in the tree is deletion of files
+# 3. the tag is not on any branch
 
 
 git show-ref --tags | \
