@@ -131,8 +131,6 @@ import_git-cvsimport() {
 		# faster startup, skip existing ones for now
 #		test -d git-import/$pkg && continue
 
-		# commits are mixed latin2 and utf8, do not force neither.
-		# -c i18n.commitencoding=iso8859-2
 		git cvsimport -d $CVSROOT -C git-import/$pkg -R -A cvs.users packages/$pkg || {
 			rm -rf git-import/$pkg
 			echo $pkg >> cvs.blacklist
@@ -144,6 +142,7 @@ import_git-cvsimport() {
 # rewrite commit logs
 # historically old commits were in latin2, detect those and convert to utf8
 git_rewrite_commitlogs() {
+	set -$d
 	local msgconv=$(pwd)/msgconv.sh
 
 	cvs_pkgs
