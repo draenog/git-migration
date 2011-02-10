@@ -42,6 +42,8 @@ cvs_dirs() {
 		for pkg in $CVSROOT/packages/*/; do
 			pkg=${pkg%/}
 			pkg=${pkg##*/}
+			# skip fp
+			[ "$pkg" = "CVS" ] && continue
 			echo $pkg
 		done > cvs.dirs
 	else
@@ -127,6 +129,9 @@ import_cvs2git() {
 		> $GIT_DIR/description
 		rm -f $GIT_DIR/hooks/*
 		unset GIT_DIR
+
+		# remove from cvs.pkgs to mark it done (for this round)
+		sed -i -e "/^$pkg\$/d" cvs.pkgs
 	done
 }
 
@@ -155,6 +160,11 @@ import_git-cvsimport() {
 			exit 1
 		}
 	done
+
+	git_rewrite_commitlogs "$@"
+
+	# do not need bare repo, if all we do is push to github
+#	git_bare "$@"
 }
 
 # rewrite commit logs
@@ -266,15 +276,10 @@ git_missingusers() {
 	touch git.users
 }
 
-
 cvs_rsync
 
 #import_git-cvsimport "$@"
 import_cvs2git "$@"
-#git_rewrite_commitlogs "$@"
 
 # missingusers needed only to analyze missing users file
 #git_missingusers
-
-# do not need bare repo, if all we do is push to github
-#git_bare "$@"
