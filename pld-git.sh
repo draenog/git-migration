@@ -26,7 +26,7 @@ cvs_rsync() {
 
 	# parse rsync log
 	# we want "^.f" - any file change
-	grep 'changes=.f' $logfile | sed -rne 's/.*name=([^/]+).*/\1/p' | sort -u > cvs.pkgs
+	grep 'changes=.f' $logfile | sed -rne 's/.*name=([^/]+)\/.*/\1/p' | sort -u > cvs.pkgs
 
 	touch cvs.rsync
 }
