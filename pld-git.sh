@@ -36,8 +36,18 @@ cvs_rsync() {
 # output: $t/cvs.dirs = list of pkgs on cvs
 cvs_dirs() {
 	set -$d
-	[ -s cvs.raw ] || cvs -d $CVSROOT -Q ls -e packages > cvs.raw 2>/dev/null
-	[ -s cvs.dirs ] || awk -F/ '$1 == "D" { print $2 } ' cvs.raw > cvs.dirs
+
+	if [ -d "$CVSROOT" ]; then
+		local pkg
+		for pkg in $CVSROOT/packages/*/; do
+			pkg=${pkg%/}
+			pkg=${pkg##*/}
+			echo $pkg
+		done > cvs.dirs
+	else
+		[ -s cvs.raw ] || cvs -d $CVSROOT -Q ls -e packages > cvs.raw 2>/dev/null
+		[ -s cvs.dirs ] || awk -F/ '$1 == "D" { print $2 } ' cvs.raw > cvs.dirs
+	fi
 }
 
 # expect cvs.pkgs, can be created by rsync.log of looking packages/ in cvs
