@@ -17,15 +17,6 @@
 
 name=$1
 
-git show-ref --tags | \
-while read rev tagname; do
-        if [ "`git show --format="%an" --quiet $rev`" = "cvs2svn" ]; then
-                git diff-tree --diff-filter=ACMRTUXB --quiet $rev~ $rev && \
-                        [ -z "`git branch --contains $rev`" ]  && \
-                        git update-ref "$tagname" $rev~
-        fi
-done
-
 git show-ref --heads | grep -E 'unlabeled-[0-9.]+$' | \
 while read rev branchname; do
         if [ -z "$name" ]; then
@@ -37,3 +28,13 @@ while read rev branchname; do
                 fi
         fi
 done
+
+git show-ref --tags | \
+while read rev tagname; do
+        if [ "`git show --format="%an" --quiet $rev`" = "cvs2svn" ]; then
+                git diff-tree --diff-filter=ACMRTUXB --quiet $rev~ $rev && \
+                        [ -z "`git branch --contains $rev`" ]  && \
+                        git update-ref "$tagname" $rev~
+        fi
+done
+
