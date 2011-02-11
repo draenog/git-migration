@@ -22,7 +22,7 @@ cvs_rsync() {
 	> $logfile
 	rsync -av rsync://cvs.pld-linux.org/cvs/packages/ packages/ \
 		--log-file=$logfile --log-file-format='changes=%i name=%n' \
-		--include=**/*,v --include=**/ --exclude=*
+		--include=**/*,v --include=**/ --exclude=* --delete --delete-excluded
 
 	# parse rsync log
 	# we want "^.f" - any file change
