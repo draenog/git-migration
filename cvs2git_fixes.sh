@@ -19,9 +19,9 @@ name=$1
 
 git show-ref --tags | \
 while read rev tagname; do
-        if [ "`git show --format="%an" --quiet $rev`" = "cvs2svn" -a \
-             -z "`git branch --contains $rev`" ]; then
+        if [ "`git show --format="%an" --quiet $rev`" = "cvs2svn" ]; then
                 git diff-tree --diff-filter=ACMRTUXB --quiet $rev~ $rev && \
+                        [ -z "`git branch --contains $rev`" ]  && \
                         git update-ref "$tagname" $rev~
         fi
 done
