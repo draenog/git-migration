@@ -22,10 +22,8 @@ while read rev branchname; do
         if [ -z "$name" ]; then
                 git update-ref -d "$branchname" $rev
         else
-                new_branchname=`echo $branchname | sed -e "s/unlabeled-\([0-9.]\+\)$/${name}-\1/"`
-                if [ "$branchname" != "$new_branchname" ]; then
-                        git update-ref "$new_branchname" $rev "" && git update-ref -d "$branchname" $rev
-                fi
+                new_branchname=`echo $branchname | sed -e "s/refs\/heads\/unlabeled-\([0-9.]\+\)$/${name}-\1/"`
+                git update-ref "refs/tags/$new_branchname" $rev "" && git update-ref -d "$branchname" $rev
         fi
 done
 
