@@ -126,6 +126,10 @@ import_cvs2git() {
 		# make final changes to converted repos by git-filter-branch
 		git filter-branch --tree-filter ". $tree_filter" -- --all
 
+                # clear all refs
+                git for-each-ref --format="%(refname)" refs/original/ | xargs -n 1 git update-ref -d
+                git gc --prune=now
+
 		# add origin remote
 		git remote add origin git@github.com:pld-linux/$pkg.git
 		# do some space
