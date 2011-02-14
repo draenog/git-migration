@@ -6,5 +6,7 @@ while read spec; do
     sed -i -e "
 		/^${first_line}$/d
 		/^${log_line}$/,\$d
+		# kill last empty line(s)
+		\${/^\$/d}
 	" $spec
 done
