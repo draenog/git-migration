@@ -3,8 +3,6 @@
 
 set -e
 export LC_ALL=C
-ftpdir=$HOME/ftp
-wwwdir=$HOME/www
 gitdir="git-import"
 CVSROOT=:pserver:cvs@cvs.pld-linux.org:/cvsroot
 d=$-
