@@ -96,6 +96,7 @@ cvs_users() {
 import_cvs2git() {
 	set -$d
 	local pkg
+	local tree_filter=$(pwd)/tree_filter.sh
 
 	[ -x /usr/bin/cvs2git ] || {
 		echo >&2 "cvs2git missing, install cvs2svn package"
@@ -121,17 +122,23 @@ import_cvs2git() {
 		git fast-import --export-marks=cvs2svn-tmp/cvs2git.marks < cvs2svn-tmp/git-blob.dat
 		git fast-import --import-marks=cvs2svn-tmp/cvs2git.marks < cvs2svn-tmp/git-dump.dat
 		./cvs2git_fixes.sh $pkg
+
+		# make final changes to converted repos by git-filter-branch
+		git filter-branch --tree-filter ". $tree_filter" -- --all
+
 		# add origin remote
 		git remote add origin git@github.com:pld-linux/$pkg.git
 		# do some space
 		git repack -a -d
 		> $GIT_DIR/description
 		rm -f $GIT_DIR/hooks/*
+
 		unset GIT_DIR
 
 		# remove from cvs.pkgs to mark it done (for this round)
 		sed -i -e "/^$pkg\$/d" cvs.pkgs
 	done
+
 }
 
 # run git cvsimport on each package module
@@ -180,19 +187,6 @@ git_rewrite_commitlogs() {
 		git filter-branch --msg-filter "$msgconv" --tag-name-filter cat -- --all
 		cd ../../
 	done
-}
-
-# make final changes to converted repos by git-filter-branch
-git_filter() {
-        set -$d
-
-        local tree_filter=$(pwd)/"tree_filter.sh"
-
-        cvs_pkgs
-        for pkg in ${@-:$(cat cvs.pkgs)}; do
-                GIT_DIR=$gitdir/$pkg git filter-branch --tree-filter ". $tree_filter" -- --all
-        done
-        [ -d .git-rewrite ] && rm -r .git-rewrite
 }
 
 # create template dir of git_bare
@@ -292,7 +286,6 @@ cvs_rsync
 
 #import_git-cvsimport "$@"
 import_cvs2git "$@"
-git_filter "$@"
 
 # missingusers needed only to analyze missing users file
 #git_missingusers
