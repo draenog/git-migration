@@ -184,6 +184,19 @@ git_rewrite_commitlogs() {
 	done
 }
 
+# make final changes to converted repos by git-filter-branch
+git_filter() {
+        set -$d
+
+        local tree_filter=$(pwd)/"tree_filter.sh"
+
+        cvs_pkgs
+        for pkg in ${@-:$(cat cvs.pkgs)}; do
+                GIT_DIR=$gitdir/$pkg git filter-branch --tree-filter ". $tree_filter" -- --all
+        done
+        [ -d .git-rewrite ] && rm -r .git-rewrite
+}
+
 # create template dir of git_bare
 # we copy system template dir and remove samples from it
 git_templates() {
@@ -281,6 +294,7 @@ cvs_rsync
 
 #import_git-cvsimport "$@"
 import_cvs2git "$@"
+git_filter "$@"
 
 # missingusers needed only to analyze missing users file
 #git_missingusers
