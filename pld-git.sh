@@ -5,6 +5,7 @@ set -e
 export LC_ALL=C
 ftpdir=$HOME/ftp
 wwwdir=$HOME/www
+gitdir="git-import"
 CVSROOT=:pserver:cvs@cvs.pld-linux.org:/cvsroot
 d=$-
 
@@ -96,7 +97,7 @@ cvs_users() {
 # conflicts with import_git-cvsimport
 import_cvs2git() {
 	set -$d
-	local pkg gitdir=git-import
+	local pkg
 
 	[ -x /usr/bin/cvs2git ] || {
 		echo >&2 "cvs2git missing, install cvs2svn package"
@@ -205,7 +206,7 @@ git_dirs() {
 # input: cvs.pkgs = list of packages
 git_bare() {
 	set -$d
-	local pkg gitdir=git-import
+	local pkg
 
 	git_templates
 	cvs_pkgs
