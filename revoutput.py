@@ -13,6 +13,11 @@ class GitOutputRev(GitOutputOption):
   def process_primary_commit(self, svn_commit):
     author = self._get_author(svn_commit)
     log_msg = self._get_log_msg(svn_commit)
+    log_msg = log_msg + "\nChanged files:"
+    for (cvs_path, rev) in sorted(
+        (cvs_rev.cvs_file.cvs_path, cvs_rev.rev) for cvs_rev in svn_commit.get_cvs_items()
+        ):
+        log_msg = log_msg + "\n    " + cvs_path+ " -> " + rev
 
     lods = set()
     for cvs_rev in svn_commit.get_cvs_items():
@@ -92,10 +97,12 @@ class GitOutputRev(GitOutputOption):
               source_lod
               ),
           )
-      for cvs_path in sorted(
-            cvs_symbol.cvs_file.cvs_path for cvs_symbol in cvs_symbols
-            ):
-        log_msg += "\n    %s" % (cvs_path,)
+      rev = {}
+      for cvs_symbol in cvs_symbols:
+          cvs_file = cvs_symbol.get_cvs_revision_source(Ctx()._cvs_items_db)
+          rev[cvs_file.cvs_path] = cvs_file.rev
+      for cvs_path in sorted(rev.iterkeys()):
+        log_msg += "\n    %s -> %s" % (cvs_path, rev[cvs_path])
     if is_initial_lod_creation:
       if cvs_files_to_delete:
         log_msg += "\nDelete:"
