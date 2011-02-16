@@ -115,7 +115,7 @@ import_cvs2git() {
 
 		export GIT_DIR=$gitdir/$pkg
 		git init
-		CVS_REPO=packages/$pkg cvs2git --options=cvs2git.options || {
+		PYTHONPATH=$(pwd) CVS_REPO=packages/$pkg cvs2git --options=cvs2git.options || {
 			rm -rf $GIT_DIR
 			exit 1
 		}

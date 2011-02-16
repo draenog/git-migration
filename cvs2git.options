@@ -82,7 +82,7 @@ from cvs2svn_lib.project import Project
 from cvs2svn_lib.git_revision_collector import GitRevisionCollector
 from cvs2svn_lib.external_blob_generator import ExternalBlobGenerator
 from cvs2svn_lib.git_output_option import GitRevisionMarkWriter
-from cvs2svn_lib.git_output_option import GitOutputOption
+from revoutput import GitOutputRev
 from cvs2svn_lib.dvcs_common import KeywordHandlingPropertySetter
 from cvs2svn_lib.revision_manager import NullRevisionCollector
 from cvs2svn_lib.rcs_revision_manager import RCSRevisionReader
@@ -511,7 +511,7 @@ for line in open("cvs.users"):
 
 # This is the main option that causes cvs2svn to output to a
 # "fastimport"-format dumpfile rather than to Subversion:
-ctx.output_option = GitOutputOption(
+ctx.output_option = GitOutputRev(
     # The file in which to write the git-fast-import stream that
     # contains the changesets and branch/tag information:
     os.path.join(ctx.tmpdir, 'git-dump.dat'),
