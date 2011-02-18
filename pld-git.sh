@@ -1,4 +1,5 @@
 #!/bin/sh
+# vim:noet:ts=4:sw=4
 # Author: Elan Ruusamäe <glen@pld-linux.org>
 
 set -e
@@ -77,7 +78,7 @@ cvs_users() {
 			cat CVSROOT/users >> cvs.userlog
 		done
 	fi
-   	perl -ne '
+	perl -ne '
 		chomp;
 		my($login, $email, $name) = split(/:/);
 		# skip notes
@@ -87,7 +88,7 @@ cvs_users() {
 		$email = "$login\@pld-linux.org";
 		printf("%s=%s <%s>\n", $login, $name, $email) unless $seen{$login};
 		$seen{$login}++;
-	'  cvs.userlog > cvs.users
+	' cvs.userlog > cvs.users
 }
 
 # run cvs2git on each package module
@@ -126,9 +127,9 @@ import_cvs2git() {
 		# make final changes to converted repos by git-filter-branch
 		git filter-branch --tree-filter ". $tree_filter" -- --all
 
-                # clear all refs
-                git for-each-ref --format="%(refname)" refs/original/ | xargs -n 1 git update-ref -d
-                git gc --prune=now
+		# clear all refs
+		git for-each-ref --format="%(refname)" refs/original/ | xargs -n 1 git update-ref -d
+		git gc --prune=now
 
 		# add origin remote
 		git remote add origin git@github.com:pld-linux/$pkg.git
