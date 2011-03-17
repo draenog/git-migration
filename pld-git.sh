@@ -99,7 +99,7 @@ import_cvs2git() {
 	local pkg
 	local tree_filter=$(pwd)/tree_filter.sh
 
-	[ -x /usr/bin/cvs2git ] || {
+	command -v cvs2git || {
 		echo >&2 "cvs2git missing, install cvs2svn package"
 		exit 1
 	}
