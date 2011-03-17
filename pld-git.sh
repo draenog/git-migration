@@ -103,7 +103,7 @@ import_cvs2git() {
 		echo >&2 "cvs2git missing, install cvs2svn package"
 		exit 1
 	}
-	[ -x .git-rewrite ] && {
+	[ -d .git-rewrite ] && {
 		echo >&2 ".git-rewrite exists; remove it if you want to continue"
 		exit 1
 	}
