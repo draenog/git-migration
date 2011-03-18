@@ -6,6 +6,7 @@ set -e
 export LC_ALL=C
 gitdir="git-import"
 CVSROOT=:pserver:cvs@cvs.pld-linux.org:/cvsroot
+LOCAL_CVS2GIT="yes"
 d=$-
 
 # get a copy of packages repo for faster local processing
@@ -209,6 +210,17 @@ git_missingusers() {
 	touch git.users
 }
 
+clone_cvs2svn() {
+	set -$d
+
+	[ "$LOCAL_CVS2GIT" = "yes" ] || return 0
+	if [ ! -x cvs2svn/cvs2git ]; then
+		git clone -b PLD_conversion git://github.com/draenog/cvs2svn.git
+	fi
+	PATH=$(pwd)/cvs2svn:$PATH
+}
+
+clone_cvs2svn
 cvs_rsync
 
 #import_git-cvsimport "$@"
