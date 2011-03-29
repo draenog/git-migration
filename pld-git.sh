@@ -133,7 +133,7 @@ import_cvs2git() {
 		git filter-branch --tree-filter ". $tree_filter" -- --all
 
 		# clear all refs
-		git for-each-ref --format="%(refname)" refs/original/ | xargs -n 1 git update-ref -d
+		git for-each-ref --format="%(refname)" refs/original/ | xargs -r -n 1 git update-ref -d
 		git gc --prune=now
 
 		# add origin remote
