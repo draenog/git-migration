@@ -303,7 +303,7 @@ global_symbol_strategy_rules = [
 
     # To force all symbols matching a regular expression to be
     # converted as branches, add rules like the following:
-    #ForceBranchRegexpStrategyRule(r'branch.*'),
+    ForceBranchRegexpStrategyRule(r'.*-branch$'),
 
     # To force all symbols matching a regular expression to be
     # converted as tags, add rules like the following:
