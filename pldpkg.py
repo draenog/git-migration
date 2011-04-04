@@ -102,13 +102,15 @@ def main(options, args):
     command, package = args
     if command == 'add':
         if p.exists(package):
-            print "%r already exists in %r" % (package, p.project)
+            print >> sys.stderr, "%r already exists in %r" % (package, p.project)
+            sys.exit(1)
         else:
             p.add(package)
             print "added %r to %r" % (package, p.project)
     if command == 'delete':
         if not p.exists(package):
-            print "%r does not exist in %r" % (package, p.project)
+            print >> sys.stderr, "%r does not exist in %r" % (package, p.project)
+            sys.exit(1)
         else:
             p.delete(package)
             print "removed %r from %r" % (package, p.project)
