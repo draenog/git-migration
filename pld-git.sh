@@ -139,7 +139,7 @@ import_cvs2git() {
 		# add origin remote
 		git remote add origin git@github.com:pld-linux/$pkg.git
 		# do some space
-		git repack -a -d
+		git repack -a -d -f -F --window=250 --depth=250
 		> $GIT_DIR/description
 		rm -f $GIT_DIR/hooks/*
 
