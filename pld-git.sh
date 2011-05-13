@@ -7,6 +7,7 @@ export LC_ALL=C
 gitdir="git-import"
 CVSROOT=:pserver:cvs@cvs.pld-linux.org:/cvsroot
 LOCAL_CVS2GIT="yes"
+REMOVE_BINARIES="no"
 d=$-
 
 # get a copy of packages repo for faster local processing
@@ -20,10 +21,13 @@ cvs_rsync() {
 	[ ! -f cvs.rsync ] || return 0
 	# sync only *,v files and dirs
 	local logfile=rsync.log
+	local exclude_pattern
+	[ "$REMOVE_BINARIES" = "yes" ] &&
+		exclude_pattern='--exclude=**/*.gz,v --exclude=**/*.bz2,v --exclude=**/*.tgz,v --exclude=**/*.Z,v'
 	> $logfile
 	rsync -av rsync://cvs.pld-linux.org/cvs/packages/ packages/ \
 		--log-file=$logfile --log-file-format='changes=%i name=%n' \
-		--include=**/*,v --include=**/ --exclude=* --delete --delete-excluded
+		$exclude_pattern --include=**/*,v --include=**/ --exclude=* --delete --delete-excluded
 
 	# parse rsync log
 	# we want "^.f" - any file change
