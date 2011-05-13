@@ -133,9 +133,6 @@ import_cvs2git() {
 		git fast-import --import-marks=cvs2svn-tmp/cvs2git.marks < cvs2svn-tmp/git-dump.dat
 		./cvs2git_fixes.sh deadbranch
 
-		# make final changes to converted repos by git-filter-branch
-		git filter-branch --tree-filter ". $tree_filter" -- --all
-
 		# clear all refs
 		git for-each-ref --format="%(refname)" refs/original/ | xargs -r -n 1 git update-ref -d
 		git gc --prune=now
