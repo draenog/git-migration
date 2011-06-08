@@ -23,7 +23,7 @@ cvs_rsync() {
 	local logfile=rsync.log
 	local exclude_pattern
 	[ "$REMOVE_BINARIES" = "yes" ] &&
-		exclude_pattern='--exclude=**/*.gz,v --exclude=**/*.bz2,v --exclude=**/*.tgz,v --exclude=**/*.Z,v'
+		exclude_pattern='--exclude=*.gz,v --exclude=*.bz2,v --exclude=*.tgz,v --exclude=*.Z,v --exclude=gap4r2.zoo,v --exclude=*.ogg,v --exclude=*.pdf,v --exclude=*.rpm,v --exclude=*.bz,v --exclude=*.mp3,v --exclude=*.bin,v --exclude=*.png,v --exclude=*.mpg,v --exclude=*.tbz2,v --exclude=*.tar,v --exclude=*.xpm,v --exclude=*.xpi,v'
 	> $logfile
 	rsync -av rsync://cvs.pld-linux.org/cvs/packages/ packages/ \
 		--log-file=$logfile --log-file-format='changes=%i name=%n' \
