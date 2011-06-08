@@ -121,9 +121,9 @@ import_cvs2git() {
 		grep -qxF $pkg cvs.blacklist && continue
 
 		# can't resume, drop old efforts
-		rm -rf $gitdir/$pkg
+		rm -rf $gitdir/${pkg}.git
 
-		export GIT_DIR=$gitdir/$pkg
+		export GIT_DIR=$gitdir/${pkg}.git
 		git init
 		PYTHONPATH=$(pwd) CVS_REPO=packages/$pkg cvs2git --options=cvs2git.options || {
 			rm -rf $GIT_DIR
