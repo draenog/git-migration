@@ -34,6 +34,7 @@ cvs_rsync() {
 	grep -E 'changes=(.f|\*deleting)' $logfile | sed -rne 's/.*name=([^/]+)\/.*/\1/p' | sort -u > cvs.pkgs
 
 	touch cvs.rsync
+	[ -d CVSROOT ] || mkdir CVSROOT
 }
 
 # generate list of .specs on ftp. needs cvsnt client
