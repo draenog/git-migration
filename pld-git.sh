@@ -18,7 +18,7 @@ cvs_rsync() {
 
 	CVSROOT=$(pwd)
 
-	[ ! -f cvs.rsync ] || return 0
+	[ ! -s cvs.rsync ] || return 0
 	# sync only *,v files and dirs
 	local logfile=rsync.log
 	local exclude_pattern
