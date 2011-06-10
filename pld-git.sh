@@ -7,7 +7,7 @@ export LC_ALL=C
 gitdir="git-import"
 CVSROOT=:pserver:cvs@cvs.pld-linux.org:/cvsroot
 LOCAL_CVS2GIT="yes"
-REMOVE_BINARIES="no"
+REMOVE_BINARIES="yes"
 d=$-
 
 # get a copy of packages repo for faster local processing
