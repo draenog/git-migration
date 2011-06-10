@@ -1,0 +1,26 @@
+To convert packages/* repositories from PLD CVS to git run:
+
+    ./pld-git.sh
+
+Conversion of CVS repos to git is done in the following steps.
+
+1. The modified version of cvs2git is cloned from github
+
+2. rsync is used to make a local copy of CVS repo
+
+   If REMOVE_BINARIES is set to yes the binary file are excluded. For an
+   exact pattern of excluded files see exclude_pattern in pld-git.sh
+
+3. The packages that have changed from last rsync are converted. For
+   conversion a modified version of cvs2git is used. 
+
+   Modifications to cvs2git:
+   
+   a. the algorithm to determine the parent branch of the given commit
+      is changed to give trunk smaller priority
+   b. the information about CVS revisions of changed files is added to
+      commit messages
+
+4. The new git repos are tweaked. For details see header of cvs2git_fixes.sh
+ 
+
