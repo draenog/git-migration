@@ -27,7 +27,7 @@ cvs_rsync() {
 	[ "$REMOVE_ICONS" = "yes" ] &&
 		icon_pattern='--exclude=*.png,v --exclude=*.xpm,v'
 	[ "$REMOVE_BINARIES" = "yes" ] &&
-		exclude_pattern='--exclude=*.gz,v --exclude=*.bz2,v --exclude=*.tgz,v --exclude=*.Z,v --exclude=gap4r2.zoo,v --exclude=*.ogg,v --exclude=*.pdf,v --exclude=*.rpm,v --exclude=*.bz,v --exclude=*.mp3,v --exclude=*.bin,v --exclude=*.mpg,v --exclude=*.tbz2,v --exclude=*.tar,v --exclude=*.xpi,v'
+		exclude_pattern='--exclude-from=binary_patterns'
 	> $logfile
 	rsync -av rsync://cvs.pld-linux.org/cvs/packages/ packages/ \
 		--log-file=$logfile --log-file-format='changes=%i name=%n' \
