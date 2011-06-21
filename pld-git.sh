@@ -8,6 +8,7 @@ gitdir="git-import"
 CVSROOT=:pserver:cvs@cvs.pld-linux.org:/cvsroot
 LOCAL_CVS2GIT="yes"
 REMOVE_BINARIES="yes"
+REMOVE_ICONS="no"
 d=$-
 
 # get a copy of packages repo for faster local processing
@@ -21,13 +22,16 @@ cvs_rsync() {
 	[ ! -s cvs.rsync ] || return 0
 	# sync only *,v files and dirs
 	local logfile=rsync.log
+	local icon_pattern
 	local exclude_pattern
+	[ "$REMOVE_ICONS" = "yes" ] &&
+		icon_pattern='--exclude=*.png,v --exclude=*.xpm,v'
 	[ "$REMOVE_BINARIES" = "yes" ] &&
-		exclude_pattern='--exclude=*.gz,v --exclude=*.bz2,v --exclude=*.tgz,v --exclude=*.Z,v --exclude=gap4r2.zoo,v --exclude=*.ogg,v --exclude=*.pdf,v --exclude=*.rpm,v --exclude=*.bz,v --exclude=*.mp3,v --exclude=*.bin,v --exclude=*.png,v --exclude=*.mpg,v --exclude=*.tbz2,v --exclude=*.tar,v --exclude=*.xpm,v --exclude=*.xpi,v'
+		exclude_pattern='--exclude=*.gz,v --exclude=*.bz2,v --exclude=*.tgz,v --exclude=*.Z,v --exclude=gap4r2.zoo,v --exclude=*.ogg,v --exclude=*.pdf,v --exclude=*.rpm,v --exclude=*.bz,v --exclude=*.mp3,v --exclude=*.bin,v --exclude=*.mpg,v --exclude=*.tbz2,v --exclude=*.tar,v --exclude=*.xpi,v'
 	> $logfile
 	rsync -av rsync://cvs.pld-linux.org/cvs/packages/ packages/ \
 		--log-file=$logfile --log-file-format='changes=%i name=%n' \
-		$exclude_pattern --include=**/*,v --include=**/ --exclude=* --delete --delete-excluded
+		$exclude_pattern $icon_pattern --include=**/*,v --include=**/ --exclude=* --delete --delete-excluded
 
 	# parse rsync log
 	# we want "^.f" - any file change
