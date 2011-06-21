@@ -27,11 +27,12 @@ cvs_rsync() {
 	[ "$REMOVE_ICONS" = "yes" ] &&
 		icon_pattern='--exclude=*.png,v --exclude=*.xpm,v'
 	[ "$REMOVE_BINARIES" = "yes" ] &&
-		exclude_pattern='--exclude-from=binary_patterns'
+		exclude_pattern='--exclude-from=binary_patterns --exclude-from=binary_files'
 	> $logfile
 	rsync -av rsync://cvs.pld-linux.org/cvs/packages/ packages/ \
 		--log-file=$logfile --log-file-format='changes=%i name=%n' \
 		$exclude_pattern $icon_pattern --include=**/*,v --include=**/ --exclude=* --delete --delete-excluded
+	[ "$REMOVE_BINARIES" = "yes" ] && ./update_binaries.pl >> binary_files
 
 	# parse rsync log
 	# we want "^.f" - any file change
