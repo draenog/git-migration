@@ -8,8 +8,9 @@ Conversion of CVS repos to git is done in the following steps.
 
 2. rsync is used to make a local copy of CVS repo
 
-   If REMOVE_BINARIES is set to yes the binary file are excluded. For an
-   exact pattern of excluded files see exclude_pattern in pld-git.sh
+   If REMOVE_BINARIES is set to yes (it is the default now) the binary files
+   that are not present on HEAD are excluded. For an exact pattern of excluded
+   files see binary_patterns file.
 
 3. The packages that have changed from last rsync are converted. For
    conversion a modified version of cvs2git is used. 
