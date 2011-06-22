@@ -11,7 +11,6 @@ close PATTERNS;
 while(<>) {
     if(/;\s+state (\w+)/) {
         if($1 eq "dead") {
-            unlink $ARGV;
             $ARGV=~s#^packages/##;
             print $ARGV;
         }
