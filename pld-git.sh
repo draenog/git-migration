@@ -143,8 +143,6 @@ import_cvs2git() {
 		git for-each-ref --format="%(refname)" refs/original/ | xargs -r -n 1 git update-ref -d
 		git gc --prune=now
 
-		# add origin remote
-		git remote add origin git@github.com:pld-linux/$pkg.git
 		# do some space
 		git repack -a -d -f -F --window=250 --depth=250
 		> $GIT_DIR/description
