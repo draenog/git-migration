@@ -1,6 +1,8 @@
 Attic/*.gz,v
 Attic/*.bz2,v
+Attic/*.lha,v
 Attic/*.tgz,v
+Attic/*.zip,v
 Attic/*.Z,v
 Attic/gap4r2.zoo,v
 Attic/*.ogg,v
@@ -13,3 +15,9 @@ Attic/*.mpg,v
 Attic/*.tbz2,v
 Attic/*.tar,v
 Attic/*.xpi,v
+Attic/*.exe,v
+Attic/*.tbz,v
+Attic/*.tar.*,v
+Attic/*.dz,v
+Attic/*.npm,v
+Attic/*.jar,v
