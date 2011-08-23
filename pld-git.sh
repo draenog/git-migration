@@ -123,6 +123,7 @@ import_cvs2git() {
 
 	touch cvs.blacklist
 	install -d $gitdir cvs2svn-tmp
+	cp cvs.pkgs cvs.last
 	for pkg in ${@:-$(cat cvs.pkgs)}; do
 		grep -qxF $pkg cvs.blacklist && continue
 
