@@ -40,7 +40,7 @@ done
 
 cat $file_tags | \
 while read rev tagname; do
-        if [ "`git show --format="%an" --quiet $rev`" = "cvs2svn" ]; then
+        if [ "`git show --format="%an" -s $rev`" = "cvs2svn" ]; then
                 git diff-tree --diff-filter=ACMRTUXB --quiet $rev~ $rev && \
                         [ -z "`git branch --contains $rev`" ]  && \
                         git update-ref "$tagname" $rev~
