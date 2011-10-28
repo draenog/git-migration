@@ -8,13 +8,5 @@ x=$@
 if [ "${x%.spec}" = "$x" ]; then
     cvs $@
 else
-    cvs $@ | \
-        sed -e "
-		/^${first_line}$/d
-		/^${define_date_line}$/,\$d
-	"  | \
-        sed -e "
-		# kill last empty line(s)
-		\${/^\$/d}
-        "
+    cvs $@ 
 fi

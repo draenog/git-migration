@@ -84,6 +84,7 @@ from cvs2svn_lib.external_blob_generator import ExternalBlobGenerator
 from cvs2svn_lib.git_output_option import GitRevisionMarkWriter
 from cvs2svn_lib.git_output_option import GitOutputOption
 from cvs2svn_lib.dvcs_common import KeywordHandlingPropertySetter
+from cvs2svn_lib.dvcs_common import SpecFileKeyword
 from cvs2svn_lib.revision_manager import NullRevisionCollector
 from cvs2svn_lib.rcs_revision_manager import RCSRevisionReader
 from cvs2svn_lib.cvs_revision_manager import CVSRevisionReader
@@ -445,6 +446,7 @@ ctx.file_property_setters.extend([
 
     # The following causes keywords to be collapsed in all text to be
     # committed:
+    SpecFileKeyword('expanded'),
     KeywordHandlingPropertySetter('collapsed'),
 
     ])
