@@ -157,7 +157,7 @@ ctx.revision_collector = GitRevisionCollector(
     #
     # Uncomment one of the two following lines:
     #RCSRevisionReader(co_executable=r'co'),
-    CVSRevisionReader(cvs_executable=r'./cvswrapper'),
+    CVSRevisionReader(cvs_executable=r'cvs'),
     )
 # This second alternative is vastly faster than the version above.  It
 # uses an external Python program to reconstruct the contents of CVS
