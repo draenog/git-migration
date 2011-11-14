@@ -21,6 +21,8 @@ Attic/*.tar.*,v
 Attic/*.dz,v
 Attic/*.npm,v
 Attic/*.jar,v
+Attic/*.png,v
+Attic/*.bmp,v
 anhviet.index,v
 enlightenment-winter.etheme.i18n,v
 hog63.ps,v
