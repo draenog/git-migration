@@ -5,19 +5,22 @@
 set -e
 export LC_ALL=C
 gitdir="git-import"
-CVSROOT=:pserver:cvs@cvs.pld-linux.org:/cvsroot
+CVSROOT=PLD_CVS
 LOCAL_CVS2GIT="yes"
 REMOVE_BINARIES="yes"
 REMOVE_ICONS="no"
 d=$-
 
+initialize_paths() {
+	set - $d
+
+	[ -d $CVSROOT/CVSROOT ] || mkdir -p $CVSROOT/CVSROOT
+}
+
 # get a copy of packages repo for faster local processing
-# modifies: sets up $CVSROOT to be local if used
 # creates: cvs.pkgs for packages being modified
 cvs_rsync() {
 	set -$d
-
-	CVSROOT=$(pwd)
 
 	[ ! -s cvs.rsync ] || return 0
 	# sync only *,v files and dirs
@@ -29,17 +32,16 @@ cvs_rsync() {
 	[ "$REMOVE_BINARIES" = "yes" ] &&
 		exclude_pattern='--exclude-from=binary_patterns --exclude-from=binary_files'
 	> $logfile
-	rsync -av rsync://cvs.pld-linux.org/cvs/packages/ packages/ \
+	rsync -av rsync://cvs.pld-linux.org/cvs/packages/ $CVSROOT/packages/ \
 		--log-file=$logfile --log-file-format='changes=%i name=%n' \
 		$exclude_pattern $icon_pattern --include=**/*,v --include=**/ --exclude=* --delete --delete-excluded
-	[ "$REMOVE_BINARIES" = "yes" ] && ./update_binaries.pl >> binary_files
+	[ "$REMOVE_BINARIES" = "yes" ] && ./update_binaries.pl $CVSROOT >> binary_files
 
 	# parse rsync log
 	# we want "^.f" - any file change
 	grep -E 'changes=(.f|\*deleting)' $logfile | sed -rne 's/.*name=([^/]+)\/.*/\1/p' | sort -u > cvs.pkgs
 
 	touch cvs.rsync
-	[ -d CVSROOT ] || mkdir CVSROOT
 }
 
 # generate list of .specs on ftp. needs cvsnt client
@@ -123,6 +125,7 @@ import_cvs2git() {
 
 	touch cvs.blacklist
 	install -d $gitdir cvs2svn-tmp
+	cp cvs.pkgs cvs.last
 	for pkg in ${@:-$(cat cvs.pkgs)}; do
 		grep -qxF $pkg cvs.blacklist && continue
 
@@ -131,7 +134,7 @@ import_cvs2git() {
 
 		export GIT_DIR=$gitdir/${pkg}.git
 		git init
-		PYTHONPATH=$(pwd) CVS_REPO=packages/$pkg cvs2git --options=cvs2git.options || {
+		PYTHONPATH=$(pwd) CVS_REPO=$CVSROOT/packages/$pkg cvs2git --options=cvs2git.options || {
 			rm -rf $GIT_DIR
 			exit 1
 		}
@@ -143,8 +146,6 @@ import_cvs2git() {
 		git for-each-ref --format="%(refname)" refs/original/ | xargs -r -n 1 git update-ref -d
 		git gc --prune=now
 
-		# add origin remote
-		git remote add origin git@github.com:pld-linux/$pkg.git
 		# do some space
 		git repack -a -d -f -F --window=250 --depth=250
 		> $GIT_DIR/description
@@ -227,6 +228,7 @@ clone_cvs2svn() {
 	PATH=$(pwd)/cvs2svn:$PATH
 }
 
+initialize_paths
 clone_cvs2svn
 cvs_rsync
 
