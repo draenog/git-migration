@@ -193,6 +193,7 @@ ctx.cvs_log_decoder = CVSTextDecoder(
     [
         #'utf8',
         #'latin1',
+        'utf8',
         'latin2',
         ],
     #fallback_encoding='ascii'
