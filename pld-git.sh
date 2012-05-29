@@ -128,6 +128,7 @@ import_cvs2git() {
 	cp cvs.pkgs cvs.last
 	for pkg in ${@:-$(cat cvs.pkgs)}; do
 		grep -qxF $pkg cvs.blacklist && continue
+		[ -e $CVSROOT/packages/$pkg ] || continue
 
 		# can't resume, drop old efforts
 		rm -rf $gitdir/${pkg}.git
